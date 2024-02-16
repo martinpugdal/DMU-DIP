@@ -1,0 +1,27 @@
+#container {
+    border: 1px solid red;
+    width: 50%;
+    margin: 30px auto;
+    padding: 10px;
+    background-color: whitesmoke;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 20px);
+    gap: 5px;
+
+    grid-auto-flow: column;
+}
+
+.item {
+    border: 1px solid blue;
+    background-color: lightgray;
+}
+
+#id-g {
+    grid-area: 2/3/3/5;
+}
+
+#id-h {
+    grid-area: 1/4/2/5;
+}

@@ -1,0 +1,35 @@
+#container {
+    border: 1px solid red;
+    width: 50%;
+    margin: 30px auto;
+    padding: 10px;
+    background-color: whitesmoke;
+
+    display: grid;
+    grid-template-columns: 40px 50px auto 50px 40px;
+    grid-template-rows: 25% 100px auto;
+    /* grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 20px); */
+    gap: 5px;
+
+    /* grid-auto-flow: row; (er default) */
+}
+
+.item {
+    border: 1px solid blue;
+    background-color: lightgray;
+}
+
+#id-g {
+    grid-area: 2/3/3/5;
+}
+
+#id-h {
+    grid-area: 1/4/2/5;
+}
+
+/*
+.item:nth-child(odd) { 
+    /* skift række hver anden gang 
+    grid-column: 1; 
+} */

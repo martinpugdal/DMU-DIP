@@ -1,0 +1,19 @@
+/* font-family.css */
+#serif {
+	font-family: "Times New Roman", Times, serif;
+}
+
+#sans-serif {
+	font-family:  Arial, Helvetica, sans-serif;
+}
+
+#monospace {
+	font-family: "Courier New", Courier, monospace;
+}
+
+#default {
+	font-size:1.5em;
+	font-style: italic;
+	text-decoration: underline;
+	text-align: center;
+}

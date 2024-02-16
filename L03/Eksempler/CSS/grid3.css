@@ -1,0 +1,54 @@
+#container {
+    border: 1px solid red;
+    width: 50%;
+    margin: 30px auto;
+    padding: 10px;
+    background-color: whitesmoke;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 20px);
+    gap: 5px;
+
+    grid-template-areas:
+            "a d . h"
+            "b e g g"
+            "c f . .";
+}
+
+.item {
+    border: 1px solid blue;
+    background-color: lightgray;
+}
+
+#id-a {
+    grid-area: a;
+}
+
+#id-b {
+    grid-area: b;
+}
+
+#id-c {
+    grid-area: c;
+}
+
+#id-d {
+    grid-area: d;
+}
+
+#id-e {
+    grid-area: e;
+}
+
+#id-f {
+    grid-area: f;
+}
+
+#id-g {
+    grid-area: g;
+}
+
+#id-h {
+    grid-area: h;
+}

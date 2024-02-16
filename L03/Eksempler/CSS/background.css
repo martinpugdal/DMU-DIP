@@ -1,0 +1,13 @@
+/*  background.css */
+p {
+	color: blue;
+}
+
+h1,h2,h3 { /* store overskrifter */
+	color: white;
+	background-color: gray;
+	text-align: center;
+}
+body {
+	background-image: url("html5.png");
+}
