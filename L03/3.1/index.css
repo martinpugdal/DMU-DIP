@@ -1,4 +1,9 @@
 h1 {
-    text-decoration-line: underline;
-    font-style: italic;
-  }
+  text-decoration-line: underline;
+  font-style: italic;
+}
+
+ol {
+  border: 3px solid red;
+  max-width: 80px;
+}
