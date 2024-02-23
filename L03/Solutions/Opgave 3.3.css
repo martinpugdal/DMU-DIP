@@ -1,0 +1,28 @@
+table {
+    border-collapse: collapse;
+    width: 80px;
+    height: 80px;
+}
+
+td {
+    border: blue 4px solid;
+    text-align: center;
+}
+
+.mingrid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 1fr 1fr;
+}
+
+.itemColumn1 {
+    grid-column-start: 1;
+    grid-column-end: 3;
+}
+
+/* responsive */
+@media only screen and (max-width: 500px) {
+	.mingrid {
+		grid-template-columns: 1fr;
+	}
+}
