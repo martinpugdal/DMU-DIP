@@ -1,0 +1,23 @@
+{
+  "name": "l17-test",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Testframeworks",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha 'testX/*.test.js'",
+    "testCoverage": "nyc --reporter=html mocha"
+  },
+  "author": "ksd",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^9.2.2",
+    "should": "^13.2.3"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {},
+  "keywords": []
+}
