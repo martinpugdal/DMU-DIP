@@ -1,4 +1,5 @@
 import { YatzyDice } from './YatzyDice.js';
+
 // GUI part
 // initialize game variables
 const dice = new YatzyDice();
@@ -71,63 +72,7 @@ function allFieldsIsFilled() {
     return true;
 }
 
-// dice
-for (let i = 0; i < dices.length; i++) {
-    dices[i].addEventListener('click', function () {
-        if (dice.getThrowCount() === 0) {
-            return;
-        }
-        if (lockedDices.includes(i)) {
-            lockedDices.splice(lockedDices.indexOf(i), 1);
-            dices[i].style.animation = 'none';
-            dices[i].classList.remove('locked');
-        } else {
-            lockedDices.push(i);
-            dices[i].style.animation = 'shake 0.5s linear 0s infinite alternate';
-            dices[i].classList.add('locked');
-        }
-    });
-}
-
-// score field
-for (let i = 0; i < scoreTable.length; i++) {
-    scoreTable[i].addEventListener('click', function () {
-        if (dice.getThrowCount() === 0) {
-            return;
-        }
-        if (scoreTable[i].classList.contains('locked')) {
-            return;
-        }
-        let score = dice.getResults()[i];
-        resetTurn();
-        for (let i = 0; i < dices.length; i++) {
-            dices[i].setAttribute('src', `assets/Unknown.png`);
-        }
-        lockedDices = [];
-        scoreTable[i].textContent = score;
-        scoreTable[i].classList.add('locked');
-        dice.setTotal(dice.getTotal() + score);
-        if (i < 6) {
-            dice.setSum(dice.getSum() + score);
-            if (dice.getSum() >= 63) {
-                totalTable[1].textContent = dice.getBonus();
-                dice.setTotal(dice.getTotal() + dice.getBonus());
-            }
-            totalTable[0].textContent = dice.getSum();
-        }
-        totalTable[2].textContent = dice.getTotal()
-        if (allFieldsIsFilled()) {
-            var result = confirm("Vil du starte et nyt spil?");
-            if (result) {
-                resetGame();
-            }
-        }
-    });
-}
-
-// roll button stuff
-let rollButton = document.querySelector('#roll');
-rollButton.addEventListener('click', function () {
+function roll() {
     if (dice.getThrowCount() === 3) {
         return;
     }
@@ -151,14 +96,86 @@ rollButton.addEventListener('click', function () {
         }, (i+1) * 120)
     }
     setTimeout(function () {
-        rollButton.textContent = 'Roll!';
-        let results = dice.getResults();
+        if (dice.getThrowCount() === 3) {
+            rollButton.textContent = 'All rolls used!';
+        } else {
+            rollButton.textContent = 'Roll!';
+        }let results = dice.getResults();
         scoreTable.forEach((scoreField, index) => {
             if (scoreField.classList.contains('locked')) return;
             scoreField.textContent = results[index];
         });
         
     }, (lastDice+1) * 120);
+}
+
+function lockDice(diceNumber) {
+    if (lockedDices.includes(diceNumber)) {
+        lockedDices.splice(lockedDices.indexOf(diceNumber), 1);
+        dices[diceNumber].style.animation = 'none';
+        dices[diceNumber].classList.remove('locked');
+    } else {
+        lockedDices.push(diceNumber);
+        dices[diceNumber].style.animation = 'shake 0.5s linear 0s infinite alternate';
+        dices[diceNumber].classList.add('locked');
+    }
+}
+
+function scoreTableClick(scoreFieldIndex) {
+    if (scoreTable[scoreFieldIndex].classList.contains('locked')) {
+        return;
+    }
+    let score = dice.getResults()[scoreFieldIndex];
+    resetTurn();
+    for (let i = 0; i < dices.length; i++) {
+        dices[i].setAttribute('src', `assets/Unknown.png`);
+    }
+    rollButton.textContent = 'Roll!';
+    lockedDices = [];
+    scoreTable[scoreFieldIndex].textContent = score;
+    scoreTable[scoreFieldIndex].classList.add('locked');
+    dice.setTotal(dice.getTotal() + score);
+    if (scoreFieldIndex < 6) {
+        dice.setSum(dice.getSum() + score);
+        if (dice.getSum() >= 63) {
+            totalTable[1].textContent = dice.getBonus();
+            dice.setTotal(dice.getTotal() + dice.getBonus());
+        }
+        totalTable[0].textContent = dice.getSum();
+    }
+    totalTable[2].textContent = dice.getTotal()
+    if (allFieldsIsFilled()) {
+        var result = confirm("Vil du starte et nyt spil?");
+        if (result) {
+            resetGame();
+        }
+    }
+}
+
+// dice
+for (let i = 0; i < dices.length; i++) {
+    dices[i].addEventListener('click', function () {
+        if (dice.getThrowCount() === 0) {
+            return;
+        }
+        lockDice(i);
+    });
+}
+
+// score field
+for (let i = 0; i < scoreTable.length; i++) {
+    scoreTable[i].addEventListener('click', function () {
+        if (dice.getThrowCount() === 0) {
+            return;
+        }
+        scoreTableClick(i);
+    });
+}
+
+// roll button stuff
+let rollButton = document.querySelector('#roll');
+rollButton.addEventListener('click', function () {
+    roll();        
 });
 
 // start game by resetting the game
