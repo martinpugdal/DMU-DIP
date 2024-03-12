@@ -5,7 +5,7 @@
   "description": "Testframeworks",
   "main": "index.js",
   "scripts": {
-    "test": "mocha 'testX/*.test.js'",
+    "test": "mocha 'test/*.test.js'",
     "testCoverage": "nyc --reporter=html mocha"
   },
   "author": "ksd",
