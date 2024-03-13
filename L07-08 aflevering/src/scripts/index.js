@@ -1,6 +1,5 @@
 import { YatzyDice } from './YatzyDice.js';
 
-// GUI part
 // initialize game variables
 const dice = new YatzyDice();
 let dices = document.querySelector('#dices').children;
@@ -72,6 +71,7 @@ function allFieldsIsFilled() {
     return true;
 }
 
+// roll dice
 function roll() {
     if (dice.getThrowCount() === 3) {
         return;
@@ -109,6 +109,7 @@ function roll() {
     }, (lastDice+1) * 120);
 }
 
+// lock dice
 function lockDice(diceNumber) {
     if (lockedDices.includes(diceNumber)) {
         lockedDices.splice(lockedDices.indexOf(diceNumber), 1);
@@ -121,6 +122,7 @@ function lockDice(diceNumber) {
     }
 }
 
+// scorefield click, data update and game reset check
 function scoreTableClick(scoreFieldIndex) {
     if (scoreTable[scoreFieldIndex].classList.contains('locked')) {
         return;
@@ -152,7 +154,7 @@ function scoreTableClick(scoreFieldIndex) {
     }
 }
 
-// dice
+// dice listeners
 for (let i = 0; i < dices.length; i++) {
     dices[i].addEventListener('click', function () {
         if (dice.getThrowCount() === 0) {
@@ -162,7 +164,7 @@ for (let i = 0; i < dices.length; i++) {
     });
 }
 
-// score field
+// score field listeners
 for (let i = 0; i < scoreTable.length; i++) {
     scoreTable[i].addEventListener('click', function () {
         if (dice.getThrowCount() === 0) {
@@ -172,7 +174,7 @@ for (let i = 0; i < scoreTable.length; i++) {
     });
 }
 
-// roll button stuff
+// roll button listener
 let rollButton = document.querySelector('#roll');
 rollButton.addEventListener('click', function () {
     roll();        

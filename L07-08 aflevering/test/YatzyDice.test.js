@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import { expect } from 'chai';
-import { YatzyDice } from '../src/YatzyDice.js';
+import { YatzyDice } from '../src/scripts/YatzyDice.js';
 import { it } from 'mocha';
 
 describe('When using the YatzyDice class', () => {
