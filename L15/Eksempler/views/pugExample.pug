@@ -1,0 +1,45 @@
+body
+    h1 hurra 
+    h2 simple list
+    ul
+        li item 1
+        li item 2
+    li item 3 ikke med i listen 
+
+    h2 list using loop and li=
+    ul 
+        each val in [1,2,3,4,5]
+            li= val
+            //- li #{val}
+
+    h2 simple table
+    table
+        tr 
+            td felt 1 i tabellen 
+            td felt 2
+        tr 
+            td row 2, felt 1
+            td row 2, felt 2
+
+
+    h2 using object passed from js
+    p hurra for #{navn}
+    p #{navn} er #{alder} år
+    p 
+        |han/hun er 
+        - 
+        if alder<12
+            |barn 
+        else if alder<20
+            |teenager
+        else 
+            |voksen
+    p 
+        |Venner er: 
+        table(border = '1')
+            - 
+            each ven in venner
+                tr 
+                    td #{ven.navn}
+                    td #{ven.alder}
+        
