@@ -1,0 +1,13 @@
+head
+    doctype html
+    title Yatzy - Rummene
+    meta(charset="UTF-8")
+body
+    div(class="container", style="display: flex; justify-content: center; align-items: center; flex-direction: column; margin-top: 20px;")
+        h1 Se alle vores rum
+        p Her kan du se alle vores rum og deres status.
+        div(class="room-card", style="display: grid; grid-column-gap: 5px; align-items: center; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 8px;")
+            each room in rooms
+                - const roomId = room.id;
+                button(class="room-card", style="border: 1px solid #bacdd8; padding: 8px; border-radius: 12px; margin: 5px;", onclick=`window.location.href='/room/'+${roomId}`)
+                    span=" - ("+room.players.length+"/"+room.maxPlayers+") : "+room.status
