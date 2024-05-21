@@ -5,6 +5,7 @@
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
+		"istart": "npm install && npm run start",
 		"start": "node index.js"
 	},
 	"dependencies": {
