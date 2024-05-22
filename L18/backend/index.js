@@ -122,7 +122,7 @@ app.get("/view/:page", (req, response) => {
 app.listen(8000, () => console.log("running"));
 
 //DEBUG values for rooms and players
-for (let i = 0; i < 25; i++) {
+for (let i = 0; i <= 255; i++) {
     const room = new Room(i.toString());
     rooms.push(room);
     const randomNumberOfPlayers = Math.floor(Math.random() * 5);

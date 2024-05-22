@@ -9,5 +9,10 @@ body
         div(class="room-card", style="display: grid; grid-column-gap: 5px; align-items: center; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 8px;")
             each room in rooms
                 - const roomId = room.id;
-                button(class="room-card", style="border: 1px solid #bacdd8; padding: 8px; border-radius: 12px; margin: 5px;", onclick=`window.location.href='/room/'+${roomId}`)
-                    span=" - ("+room.players.length+"/"+room.maxPlayers+") : "+room.status
+                - const color = room.status === "WAITING" ? "#f0ad4e" : room.status === "STARTED" ? "#5cb85c" : "#777";
+                button(class="room-card", style=`border: 1px solid #bacdd8; padding: 8px; border-radius: 12px; margin: 5px; background-color: ${color}`, onclick=`window.location.href='/room/'+${roomId}`)
+                    span=" Rum nr. "+ roomId + "  ("+room.players.length+"/"+room.maxPlayers+") : "
+                    br
+                    br
+                    span="Status: "
+                    span(style="font-weight: bold;")= room.status
