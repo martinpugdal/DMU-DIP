@@ -5,6 +5,7 @@ export class Player {
 		this.session = session;
 		this.name = name;
 		this.yatzyDice = new YatzyDice();
+		this.started = false;
 	}
 
 	getName() {
@@ -19,7 +20,32 @@ export class Player {
 		return this.yatzyDice;
 	}
 
+	getScore() {
+		return this.yatzyDice.getTotal();
+	}
+
 	resetYatzyDice() {
 		this.yatzyDice = new YatzyDice();
+	}
+
+	isFinished() {
+		return this.yatzyDice.isFinished();
+	}
+
+	getStarted() {
+		return this.started;
+	}
+
+	setStarted(started) {
+		this.started = started;
+	}
+
+	toMap() {
+		return {
+			name: this.name,
+			started: this.started,
+			finished: this.isFinished(),
+			score: this.getScore(),
+		};
 	}
 }

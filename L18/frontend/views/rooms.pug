@@ -16,3 +16,8 @@ body
                     br
                     span="Status: "
                     span(style="font-weight: bold;")= room.status
+        if sessionID !== null
+            button.btn.btn-primary(style="margin-top: 20px;", onclick="window.location.href='/create'") Opret et nyt rum
+
+    script.
+        const sessionID = sessionStorage.getItem("sessionID");

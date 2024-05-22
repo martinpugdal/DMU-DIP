@@ -3,12 +3,8 @@ export class YatzyDice {
 		this.values = [0, 0, 0, 0, 0];
 		this.throwCount = 0;
 		this.sum = 0;
-		this.bonusThreshold = 63;
 		this.bonus = 50;
-		this.bonusGranted = false;
 		this.total = 0;
-		this.results = [];
-		this.locked = [false, false, false, false, false];
 	}
 
 	getRandom() {
@@ -31,22 +27,6 @@ export class YatzyDice {
 		this.sum = sum;
 	}
 
-	isBonusThresholdReached() {
-		return this.sum >= this.bonusThreshold;
-	}
-
-	isBonusGranted() {
-		return this.bonusGranted;
-	}
-
-	checkBonus() {
-		if (this.isBonusThresholdReached() && !this.bonusGranted) {
-			this.bonusGranted = true;
-			this.setTotal(this.getTotal() + this.getBonus());
-		}
-		return this.bonusGranted;
-	}
-
 	getBonus() {
 		return this.bonus;
 	}
@@ -59,37 +39,17 @@ export class YatzyDice {
 		this.total = total;
 	}
 
-	addToTotal(points, field) {
-		const fieldIndex = this.results.findIndex(
-			(result) => result.field === field
-		);
-		if (fieldIndex !== -1) return false;
-		this.results.push(field);
-		this.total += points;
-		return true;
-	}
-
-	lockDie(index) {
-		this.locked[index] = !this.locked[index];
-	}
-
-	isDieLocked(index) {
-		return this.locked[index];
-	}
-
 	getThrowCount() {
 		return this.throwCount;
 	}
 
 	resetThrowCount() {
 		this.throwCount = 0;
-		this.locked = [false, false, false, false, false];
-		this.values = [0, 0, 0, 0, 0];
 	}
 
-	throwDice() {
+	throwDice(diceNumbersToSkip = []) {
 		for (let i = 0; i < 5; i++) {
-			if (this.locked[i]) {
+			if (diceNumbersToSkip.includes(i)) {
 				continue;
 			}
 			this.values[i] = this.getRandom();
@@ -239,9 +199,5 @@ export class YatzyDice {
 			}
 		}
 		return yatzyPoints;
-	}
-
-	isFinished() {
-		return this.results.length === 15; // 15 fields in all in Yatzy
 	}
 }

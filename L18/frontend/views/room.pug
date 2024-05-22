@@ -24,10 +24,15 @@ html
         - list.sort((a,b)=>{return b.score - a.score;});
         ul 
           each player in list
-            li= player.name + " - " + player.score
+            if player.finished === true
+              li= player.name + " - " + player.score + " - Færdig"
+            else
+              li= player.name + " - " + player.score
 
       if status == "WAITING" && players.length > 1
         button.btn.btn-primary(onclick="startGameHandler(event)") Start spil
+
+      button.btn.btn-primary(onclick="window.location.href='/'") Tilbage til forsiden
 
     //- Render joinRoom function from the server to the client
     script.
@@ -36,7 +41,7 @@ html
     //- Inline client-side script to handle the join room logic
     script.
       async function joinRoomHandler(event) {
-        event.preventDefault(); // Prevent form submission
+        event.preventDefault();
         const username = document.getElementById('username').value;
         const roomID = "#{id}";
         const sessionID = sessionStorage.getItem("sessionID");
@@ -51,12 +56,14 @@ html
       }
 
       async function startGameHandler(event) {
-        event.preventDefault(); // Prevent form submission
+        event.preventDefault();
         const roomID = "#{id}";
-        const message = await startGame("!{apiURL}", roomID);
-        if (message !== "Success, game started") {
-          alert(message);
+        const sessionID = sessionStorage.getItem("sessionID");
+        const res = await post("!{apiURL}" + "/rooms/" + roomID + "/start", {}, sessionID);
+        if (res.success === true) {
+          const newLocation = location.href + "/game";
+          window.location.href = newLocation+"?sessionID="+sessionID;
         } else {
-          location.reload();
+          alert(res.message);
         }
       }
