@@ -1,0 +1,61 @@
+doctype html
+html
+  head
+    title Yatzy - Rum #{id}
+    meta(charset="UTF-8")
+  body
+    div.container(style="display: flex; justify-content: center; align-items: center; flex-direction: column;")
+      h1 Velkommen til Yatzy spillet.
+      p Her kan du spille Yatzy med dine venner.
+
+      form
+        label(for="name") Brugernavn
+        input(type="text", id="username")
+        button.btn.btn-primary(onclick="joinRoomHandler(event)") Join rum
+
+      h2 Spillere i rum #{id} - (#{players.length}/#{maxPlayers}) : #{status}
+      if status == "WAITING" || status == "STARTED"
+        ul
+          each player in players
+            li= player.name
+      else
+        - const list = players;
+        - list.sort((a,b)=>{return b.score - a.score;});
+        ul 
+          each player in list
+            li= player.name + " - " + player.score
+
+      if status == "WAITING"
+        button.btn.btn-primary(onclick="startGameHandler(event)") Start spil
+
+    //- Render joinRoom function from the server to the client
+    script.
+      !{post}
+      
+    //- Inline client-side script to handle the join room logic
+    script.
+      async function joinRoomHandler(event) {
+        event.preventDefault(); // Prevent form submission
+        const username = document.getElementById('username').value;
+        const roomID = "#{id}";
+        const sessionID = sessionStorage.getItem("sessionID");
+        const values = await post("!{apiURL}" + "/login", { username, roomID }, sessionID);
+        const message = values.message;
+        if (message !== "Success, player added") {
+          alert(message);
+        } else {
+          sessionStorage.setItem("sessionID", values.sessionID);
+          location.reload();
+        }
+      }
+
+      async function startGameHandler(event) {
+        event.preventDefault(); // Prevent form submission
+        const roomID = "#{id}";
+        const message = await startGame("!{apiURL}", roomID);
+        if (message !== "Success, game started") {
+          alert(message);
+        } else {
+          location.reload();
+        }
+      }

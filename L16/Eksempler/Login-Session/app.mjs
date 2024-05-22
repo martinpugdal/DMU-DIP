@@ -1,20 +1,27 @@
 // app.js
-import express from 'express';
+import express from "express";
 const app = express();
-import sessions from 'express-session';
-import pug from 'pug';
-import path from 'path';
-import {fileURLToPath} from 'url';
+import sessions from "express-session";
+import pug from "pug";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 
 // 👇️ "/home/john/Desktop/javascript"
 const __dirname = path.dirname(__filename);
-app.set('view engine', 'pug');
+app.set("view engine", "pug");
 app.set("views", __dirname + "/views");
 
-app.use(sessions({ secret: 'hemmelig', saveUninitialized: true, cookie: { maxAge: 1000*60*20 }, resave: false }));
-app.use(express.static(__dirname + '/filer'));
+app.use(
+    sessions({
+        secret: "hemmelig",
+        saveUninitialized: true,
+        cookie: { maxAge: 1000 * 60 * 20 },
+        resave: true,
+    })
+); // 20 minutters timeout
+app.use(express.static(__dirname + "/filer"));
 //app.use(express.static(__dirname));
 app.use(express.json());
 // app.use(function (req, res, next) {
@@ -23,35 +30,35 @@ app.use(express.json());
 //     next();
 // });
 
-app.post('/login', (request, response) => {
+app.post("/login", (request, response) => {
     const { navn, password } = request.body;
-    if (password === '111' && navn) {
+    if (password === "111" && navn) {
         request.session.navn = navn;
-        response.status(201).send(['login ok!']);
+        response.status(201).send(["login ok!"]);
     } else {
         response.sendStatus(401);
     }
 });
 
-app.get('/session', (request, response) => {
+app.get("/session", (request, response) => {
     const navn = request.session.navn;
     if (navn != null) {
-        response.render('velkommen', { navn });
+        response.render("velkommen", { navn });
     } else {
-        response.redirect('/ingenAdgang.html');
+        response.redirect("/ingenAdgang.html");
     }
 });
 
-app.get('/logout', (request, response) => {
+app.get("/logout", (request, response) => {
     request.session.destroy((err) => {
         if (err) {
             console.log(err);
         } else {
-            response.redirect('/');
+            response.redirect("/");
         }
     });
 });
 
-app.listen(8000);
+app.listen(1111);
 
-console.log('Lytter på port 8000 ...');
+console.log("Lytter på port 1111 ...");
