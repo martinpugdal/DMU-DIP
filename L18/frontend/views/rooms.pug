@@ -1,23 +1,190 @@
-head
-    doctype html
-    title Yatzy - Rummene
-    meta(charset="UTF-8")
-body
-    div(class="container", style="display: flex; justify-content: center; align-items: center; flex-direction: column; margin-top: 20px;")
-        h1 Se alle vores rum
-        p Her kan du se alle vores rum og deres status.
-        div(class="room-card", style="display: grid; grid-column-gap: 5px; align-items: center; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 8px;")
-            each room in rooms
-                - const roomId = room.id;
-                - const color = room.status === "WAITING" ? "#f0ad4e" : room.status === "STARTED" ? "#5cb85c" : "#777";
-                button(class="room-card", style=`border: 1px solid #bacdd8; padding: 8px; border-radius: 12px; margin: 5px; background-color: ${color}`, onclick=`window.location.href='/room/'+${roomId}`)
-                    span=" Rum nr. "+ roomId + "  ("+room.players.length+"/"+room.maxPlayers+") : "
-                    br
-                    br
-                    span="Status: "
-                    span(style="font-weight: bold;")= room.status
-        if sessionID !== null
-            button.btn.btn-primary(style="margin-top: 20px;", onclick="window.location.href='/create'") Opret et nyt rum
+doctype html
+html(lang="en")
+    head
+        title Yatzy - Rummene
+        meta(charset="UTF-8")
+        style.
+            body {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin: 0;
+                background-color: #f0f0f0;
+            }
+            .login-container {
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                width: 300px;
+                text-align: center;
+                box-sizing: border-box;
+                margin-top: 20px;
+            }
+            .login-container h1 {
+                margin-bottom: 20px;
+                font-size: 24px;
+            }
+            .login-container input {
+                width: calc(100% - 22px);
+                padding: 10px;
+                margin: 10px 0;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+            .login-container button {
+                padding: 10px;
+            }
+            .container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                margin-top: 20px;
+                width: 100%;
+            }
+            .room-card {
+                display: grid;
+                grid-column-gap: 15px;
+                grid-row-gap: 15px;
+                align-items: center;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                padding: 15px;
+                border-radius: 8px;
+                max-width: 55%;
+                width: calc(100% - 40px);
+            }
+            .room-button {
+                border: 1px solid #bacdd8;
+                padding: 8px;
+                border-radius: 12px;
+                margin: 5px;
+                cursor: pointer;
+                width: calc(100% - 16px);
+                box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+                box-sizing: border-box;
+            }
+            .btn-primary {
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                padding: 10px;
+            }
+            .btn-primary:hover {
+                background-color: #0056b3;
+            }
+            .user-info {
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                width: 300px;
+                text-align: center;
+                box-sizing: border-box;
+                margin-top: 20px;
+            }
+            .player-list-container {
+                position: fixed;
+                top: 50%;
+                right: 20px;
+                transform: translateY(-50%);
+                width: 200px;
+                box-sizing: border-box;
+            }
+            .player-list {
+                background: wheat;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                max-height: 400px;
+                overflow-y: auto;
+                box-sizing: border-box;
+            }
+            .player-list h2 {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+            .player-list ul {
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+            }
+            .player-list li {
+                margin: 5px 0;
+            }
+    body
+        div.login-container
+        div.user-info
 
-    script.
-        const sessionID = sessionStorage.getItem("sessionID");
+        div.container
+            h1 Se alle vores rum
+            p Her kan du se alle vores rum og deres status.
+            div.room-card
+                each room in rooms
+                    - const roomId = room.id;
+                    - const color = room.status === "WAITING" ? "#f0ad4e" : room.status === "STARTED" ? "#5cb85c" : "#777";
+                    button.room-button(style=`background-color: ${color}`, onclick=`window.location.href='/room/'+${roomId}`)
+                        span= `Rum nr. ${roomId} (${room.players.length}/${room.maxPlayers})`
+                        br
+                        span Status:
+                        span(style="font-weight: bold;")= room.status
+
+        div.player-list-container
+            h2 Spillerliste
+            div.player-list
+                ul
+                    each room in rooms
+                        each player in room.players
+                            li= player.name
+
+        script.
+            !{post}
+            !{get}
+            
+            let sessionID = sessionStorage.getItem("sessionID");
+            if (sessionID !== null) {
+                document.querySelector(".login-container").innerHTML = "";
+                document.querySelector(".login-container").style.display = "none";
+                document.querySelector(".user-info").innerHTML = "<h2>Velkommen til Yatzy spillet</h2>";
+                document.querySelector(".user-info").innerHTML += "<p>Her kan du spille Yatzy med dine venner.</p>";
+                document.querySelector(".container").appendChild(document.createElement("button")).outerHTML = `<button class="btn-primary" style="margin-top: 20px;" onclick="window.location.href='/create'">Opret et nyt rum</button>`;
+            } else {
+                document.querySelector(".user-info").innerHTML = "";
+                document.querySelector(".user-info").style.display = "none";
+                document.querySelector(".login-container").innerHTML = `<h1>Log ind</h1><input id="username" type="text" placeholder="Brugernavn"><button class="btn-primary" onclick="login(event)">Log ind</button>`;
+            }
+            get("!{apiURL}" + "/user", sessionID === null ? "" : sessionID).then(
+                (values) => {
+                    console.log(values);
+                    if (values.success === true) {
+                        const user_info = document.querySelector(".user-info");
+                        user_info.innerHTML = `<h2>Hej, ${values.player.name}!</h2>`;
+                        if (values.room) {
+                            user_info.innerHTML += `<p>Du er allerede i <b>rum ${values.room.id}</b> med ${values.room.players.length} spiller(e).</p>`;
+                            user_info.innerHTML += `<button class="btn-primary" onclick="window.location.href='/room/${values.room.id}'">Gå til rummet</button>`;
+                        }
+                    } else {
+                        if (sessionID !== null) {
+                            sessionStorage.removeItem("sessionID");
+                            location.reload();
+                        }
+                    }
+                }
+            );
+
+            async function login(event) {
+                event.preventDefault();
+                const username = document.getElementById('username').value;
+                const sID = sessionStorage.getItem("sessionID");
+                const values = await post("!{apiURL}" + "/login", {username: username}, sID);
+                console.log(values);
+                if (values.sessionID !== undefined) {
+                    sessionStorage.setItem("sessionID", values.sessionID);
+                    location.reload();
+                } else {
+                    alert(values.message);
+                }
+            }

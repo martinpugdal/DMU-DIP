@@ -1,247 +1,264 @@
 export class YatzyDice {
-	constructor() {
-		this.values = [0, 0, 0, 0, 0];
-		this.throwCount = 0;
-		this.sum = 0;
-		this.bonusThreshold = 63;
-		this.bonus = 50;
-		this.bonusGranted = false;
-		this.total = 0;
-		this.results = [];
-		this.locked = [false, false, false, false, false];
-	}
+    constructor() {
+        this.values = [0, 0, 0, 0, 0];
+        this.throwCount = 0;
+        this.bonusThreshold = 63;
+        this.bonus = 50;
+        this.bonusGranted = false;
+        this.results = [
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        ]; // 15 fields
+        this.locked = [false, false, false, false, false]; // 5 dice
+    }
 
-	getRandom() {
-		return Math.floor(Math.random() * 6) + 1;
-	}
+    getRandom() {
+        return Math.floor(Math.random() * 6) + 1;
+    }
 
-	getValues() {
-		return this.values;
-	}
+    getValues() {
+        return this.values;
+    }
 
-	setValues(values) {
-		this.values = values;
-	}
+    setValues(values) {
+        this.values = values;
+    }
 
-	getSum() {
-		return this.sum;
-	}
+    getSum() {
+        return this.results
+            .map((result) => (result !== -1 ? result : 0))
+            .reduce((a, b) => a + b, 0);
+    }
 
-	setSum(sum) {
-		this.sum = sum;
-	}
+    getTotal() {
+        return (
+            this.results
+                .map((result) => (result !== -1 ? result : 0))
+                .reduce((a, b) => a + b, 0) +
+            (this.isBonusGranted() ? this.getBonus() : 0)
+        );
+    }
 
-	isBonusThresholdReached() {
-		return this.sum >= this.bonusThreshold;
-	}
+    isBonusThresholdReached() {
+        return this.getSum() >= this.bonusThreshold;
+    }
 
-	isBonusGranted() {
-		return this.bonusGranted;
-	}
+    isBonusGranted() {
+        return this.bonusGranted;
+    }
 
-	checkBonus() {
-		if (this.isBonusThresholdReached() && !this.bonusGranted) {
-			this.bonusGranted = true;
-			this.setTotal(this.getTotal() + this.getBonus());
-		}
-		return this.bonusGranted;
-	}
+    checkBonus() {
+        if (this.isBonusThresholdReached() && !this.bonusGranted) {
+            this.bonusGranted = true;
+        }
+        return this.bonusGranted;
+    }
 
-	getBonus() {
-		return this.bonus;
-	}
+    getBonus() {
+        return this.bonus;
+    }
 
-	getTotal() {
-		return this.total;
-	}
+    lockDie(index) {
+        this.locked[index] = !this.locked[index];
+    }
 
-	setTotal(total) {
-		this.total = total;
-	}
+    isDieLocked(index) {
+        return this.locked[index];
+    }
 
-	addToTotal(points, field) {
-		const fieldIndex = this.results.findIndex(
-			(result) => result.field === field
-		);
-		if (fieldIndex !== -1) return false;
-		this.results.push(field);
-		this.total += points;
-		return true;
-	}
+    getThrowCount() {
+        return this.throwCount;
+    }
 
-	lockDie(index) {
-		this.locked[index] = !this.locked[index];
-	}
+    resetThrowCount() {
+        this.throwCount = 0;
+        this.locked = [false, false, false, false, false];
+        this.values = [0, 0, 0, 0, 0];
+    }
 
-	isDieLocked(index) {
-		return this.locked[index];
-	}
+    throwDice() {
+        for (let i = 0; i < 5; i++) {
+            if (this.locked[i]) {
+                continue;
+            }
+            this.values[i] = this.getRandom();
+        }
+        this.throwCount++;
+    }
 
-	getThrowCount() {
-		return this.throwCount;
-	}
+    getCombinations() {
+        const combinations = [].fill(0, 0, 14);
+        for (let i = 0; i < 6; i++) {
+            combinations[i] = this.sameValuePoints(i);
+        }
+        combinations[6] = this.onePairPoints();
+        combinations[7] = this.twoPairPoints();
+        combinations[8] = this.threeSamePoints();
+        combinations[9] = this.fourSamePoints();
+        combinations[10] = this.fullHousePoints();
+        combinations[11] = this.smallStraightPoints();
+        combinations[12] = this.largeStraightPoints();
+        combinations[13] = this.chancePoints();
+        combinations[14] = this.yatzyPoints();
+        return combinations;
+    }
 
-	resetThrowCount() {
-		this.throwCount = 0;
-		this.locked = [false, false, false, false, false];
-		this.values = [0, 0, 0, 0, 0];
-	}
+    getResult(field) {
+        return this.results[field];
+    }
 
-	throwDice() {
-		for (let i = 0; i < 5; i++) {
-			if (this.locked[i]) {
-				continue;
-			}
-			this.values[i] = this.getRandom();
-		}
-		this.throwCount++;
-	}
+    chooseField(field) {
+        if (this.results[field] !== -1) {
+            return false;
+        }
+        const points = this.getCombinations()[field];
+        this.results[field] = points;
+        this.checkBonus();
+        return true;
+    }
 
-	getResults() {
-		const results = [].fill(0, 0, 14);
-		for (let i = 0; i < 6; i++) {
-			results[i] = this.sameValuePoints(i);
-		}
-		results[6] = this.onePairPoints();
-		results[7] = this.twoPairPoints();
-		results[8] = this.threeSamePoints();
-		results[9] = this.fourSamePoints();
-		results[10] = this.fullHousePoints();
-		results[11] = this.smallStraightPoints();
-		results[12] = this.largeStraightPoints();
-		results[13] = this.chancePoints();
-		results[14] = this.yatzyPoints();
-		return results;
-	}
+    frequency() {
+        const frequency = [0, 0, 0, 0, 0, 0];
+        for (const value of this.values) {
+            frequency[value - 1]++;
+        }
+        return frequency;
+    }
 
-	frequency() {
-		const frequency = [0, 0, 0, 0, 0, 0];
-		for (const value of this.values) {
-			frequency[value - 1]++;
-		}
-		return frequency;
-	}
+    sameValuePoints(value) {
+        return this.frequency()[value] * (value + 1);
+    }
 
-	sameValuePoints(value) {
-		return this.frequency()[value] * (value + 1);
-	}
+    onePairPoints() {
+        let pairPoints = 0;
+        const frequency = this.frequency();
+        for (let i = 0; i < frequency.length; i++) {
+            if (frequency[i] >= 2 && frequency[i] < 4) {
+                pairPoints = i + 1;
+            }
+        }
+        return pairPoints * 2;
+    }
 
-	onePairPoints() {
-		let pairPoints = 0;
-		const frequency = this.frequency();
-		for (let i = 0; i < frequency.length; i++) {
-			if (frequency[i] >= 2 && frequency[i] < 4) {
-				pairPoints = i + 1;
-			}
-		}
-		return pairPoints * 2;
-	}
+    twoPairPoints() {
+        let points = 0;
+        const pair1Points = this.onePairPoints() / 2;
+        const frequency = this.frequency();
+        for (let i = 0; i < pair1Points - 1; i++) {
+            if (frequency[i] >= 2 && frequency[i] < 4) {
+                points = pair1Points * 2 + (i + 1) * 2;
+            }
+        }
+        return points;
+    }
 
-	twoPairPoints() {
-		let points = 0;
-		const pair1Points = this.onePairPoints() / 2;
-		const frequency = this.frequency();
-		for (let i = 0; i < pair1Points - 1; i++) {
-			if (frequency[i] >= 2 && frequency[i] < 4) {
-				points = pair1Points * 2 + (i + 1) * 2;
-			}
-		}
-		return points;
-	}
+    threeSamePoints() {
+        let threeSamePoints = 0;
+        const frequency = this.frequency();
+        for (let i = 0; i < frequency.length; i++) {
+            if (frequency[i] >= 3) {
+                threeSamePoints = (i + 1) * 3;
+            }
+        }
+        return threeSamePoints;
+    }
 
-	threeSamePoints() {
-		let threeSamePoints = 0;
-		const frequency = this.frequency();
-		for (let i = 0; i < frequency.length; i++) {
-			if (frequency[i] >= 3) {
-				threeSamePoints = (i + 1) * 3;
-			}
-		}
-		return threeSamePoints;
-	}
+    fourSamePoints() {
+        let fourSamePoints = 0;
+        const frequency = this.frequency();
+        for (let i = 0; i < frequency.length; i++) {
+            if (frequency[i] >= 4) {
+                fourSamePoints = (i + 1) * 4;
+            }
+        }
+        return fourSamePoints;
+    }
 
-	fourSamePoints() {
-		let fourSamePoints = 0;
-		const frequency = this.frequency();
-		for (let i = 0; i < frequency.length; i++) {
-			if (frequency[i] >= 4) {
-				fourSamePoints = (i + 1) * 4;
-			}
-		}
-		return fourSamePoints;
-	}
+    fullHousePoints() {
+        let fullHousePoints = 0;
+        let threeSamePoints = 0;
+        let pairPoints = 0;
+        const frequency = this.frequency();
+        for (let i = 0; i < frequency.length; i++) {
+            if (frequency[i] >= 3) {
+                threeSamePoints = i + 1;
+            }
+        }
+        for (let i = 0; i < frequency.length; i++) {
+            if (frequency[i] >= 2 && threeSamePoints !== i + 1) {
+                pairPoints = i + 1;
+            }
+        }
+        if (threeSamePoints !== 0 && pairPoints !== 0) {
+            fullHousePoints = threeSamePoints * 3 + pairPoints * 2;
+        }
+        return fullHousePoints;
+    }
 
-	fullHousePoints() {
-		let fullHousePoints = 0;
-		let threeSamePoints = 0;
-		let pairPoints = 0;
-		const frequency = this.frequency();
-		for (let i = 0; i < frequency.length; i++) {
-			if (frequency[i] >= 3) {
-				threeSamePoints = i + 1;
-			}
-		}
-		for (let i = 0; i < frequency.length; i++) {
-			if (frequency[i] >= 2 && threeSamePoints !== i + 1) {
-				pairPoints = i + 1;
-			}
-		}
-		if (threeSamePoints !== 0 && pairPoints !== 0) {
-			fullHousePoints = threeSamePoints * 3 + pairPoints * 2;
-		}
-		return fullHousePoints;
-	}
+    smallStraightPoints() {
+        let smallStraightPoints = 0;
+        const frequency = this.frequency();
+        if (
+            frequency[0] === 1 &&
+            frequency[1] === 1 &&
+            frequency[2] === 1 &&
+            frequency[3] === 1 &&
+            frequency[4] === 1
+        ) {
+            smallStraightPoints = 1 + 2 + 3 + 4 + 5;
+        }
+        return smallStraightPoints;
+    }
 
-	smallStraightPoints() {
-		let smallStraightPoints = 0;
-		const frequency = this.frequency();
-		if (
-			frequency[0] === 1 &&
-			frequency[1] === 1 &&
-			frequency[2] === 1 &&
-			frequency[3] === 1 &&
-			frequency[4] === 1
-		) {
-			smallStraightPoints = 1 + 2 + 3 + 4 + 5;
-		}
-		return smallStraightPoints;
-	}
+    largeStraightPoints() {
+        let largeStraightPoints = 0;
+        const frequency = this.frequency();
+        if (
+            frequency[1] === 1 &&
+            frequency[2] === 1 &&
+            frequency[3] === 1 &&
+            frequency[4] === 1 &&
+            frequency[5] === 1
+        ) {
+            largeStraightPoints = 20;
+        }
+        return largeStraightPoints;
+    }
 
-	largeStraightPoints() {
-		let largeStraightPoints = 0;
-		const frequency = this.frequency();
-		if (
-			frequency[1] === 1 &&
-			frequency[2] === 1 &&
-			frequency[3] === 1 &&
-			frequency[4] === 1 &&
-			frequency[5] === 1
-		) {
-			largeStraightPoints = 20;
-		}
-		return largeStraightPoints;
-	}
+    chancePoints() {
+        let chancePoints = 0;
+        for (const face of this.getValues()) {
+            chancePoints += face;
+        }
+        return chancePoints;
+    }
 
-	chancePoints() {
-		let chancePoints = 0;
-		for (const face of this.getValues()) {
-			chancePoints += face;
-		}
-		return chancePoints;
-	}
+    yatzyPoints() {
+        let yatzyPoints = 0;
+        const frequency = this.frequency();
+        for (const freqNum of frequency) {
+            if (freqNum === 5) {
+                yatzyPoints = 50;
+            }
+        }
+        return yatzyPoints;
+    }
 
-	yatzyPoints() {
-		let yatzyPoints = 0;
-		const frequency = this.frequency();
-		for (const freqNum of frequency) {
-			if (freqNum === 5) {
-				yatzyPoints = 50;
-			}
-		}
-		return yatzyPoints;
-	}
+    isFinished() {
+        return this.results.every((result) => result !== -1);
+    }
 
-	isFinished() {
-		return this.results.length === 15; // 15 fields in all in Yatzy
-	}
+    toMap() {
+        return {
+            values: this.values,
+            throwCount: this.throwCount,
+            sum: this.getSum(),
+            bonusThreshold: this.bonusThreshold,
+            bonus: this.bonus,
+            bonusGranted: this.bonusGranted,
+            total: this.getTotal(),
+            combinations: this.getCombinations(),
+            results: this.results,
+            locked: this.locked,
+        };
+    }
 }
