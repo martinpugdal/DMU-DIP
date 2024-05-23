@@ -119,9 +119,7 @@ export class YatzyDice {
 		if (this.results[field] !== -1) {
 			return false;
 		}
-		console.log(this.getCombinations());
 		const points = this.getCombinations()[field];
-		console.log(points);
 		this.results[field] = points;
 		this.checkBonus();
 		return true;
