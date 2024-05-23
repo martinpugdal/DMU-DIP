@@ -40,7 +40,7 @@ function createRoom() {
                 prev.getId() > current.getId() ? prev : current
             )
             .getId();
-        return new Room(`${newID + 1}`);
+        return new Room(`${parseInt(newID) + 1}`);
     }
 }
 
