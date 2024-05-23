@@ -141,9 +141,8 @@ html(lang="en")
             h2 Spillerliste
             div.player-list
                 ul
-                    each room in rooms
-                        each player in room.players
-                            li= player.name
+                    each player in players
+                        li= player.name
 
         script.
             !{post}
@@ -163,7 +162,6 @@ html(lang="en")
             }
             get("!{apiURL}" + "/user", sessionID === null ? "" : sessionID).then(
                 (values) => {
-                    console.log(values);
                     if (values.success === true) {
                         const user_info = document.querySelector(".user-info");
                         user_info.innerHTML = `<h2>Hej, ${values.player.name}!</h2>`;

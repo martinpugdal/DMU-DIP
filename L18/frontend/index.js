@@ -28,6 +28,8 @@ app.get("/:view", (req, res) => {
         return;
     }
     console.log("VIEW GET /" + page);
+    // print the ip from request
+    console.log("IP: " + req.ip);
 
     const apiReqURL = getAPIURL() + "/" + page;
     get(apiReqURL)
@@ -89,9 +91,8 @@ app.get("/room/:roomID/game", async (req, res) => {
     }
 });
 
-const dev = true; // change it to false when we want to deploy (for other people to see)
-const port = dev ? 3000 : process.env.PORT;
-const host = dev ? "localhost" : process.env.HOST;
+const host = "0.0.0.0";
+const port = 3000;
 app.listen(port, host, () => {
     console.log(`Server running on http://${host}:${port}`);
 });

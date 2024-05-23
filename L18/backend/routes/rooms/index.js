@@ -4,13 +4,11 @@ import { rooms, players } from "../../index.js";
 
 router.get("/", (req, res) => {
     const objekt = {};
-    const resValues = rooms.map((room) => {
-        return {
-            id: room.getId(),
-            players: room.getPlayers().map((player) => player.toMap()),
-            maxPlayers: room.getMaxPlayers(),
-            status: room.getStatus(),
-        };
+    const roomsMapped = rooms.map((room) => {
+        return room.toMap();
+    });
+    const playersMapped = players.map((player) => {
+        return player.toMap();
     });
     const sessionID = req.query?.sessionID;
     if (sessionID !== undefined && sessionID !== "") {
@@ -22,7 +20,8 @@ router.get("/", (req, res) => {
             objekt.player = room.getPlayerBySessionID(sessionID).toMap();
         }
     }
-    objekt.rooms = resValues;
+    objekt.rooms = roomsMapped;
+    objekt.players = playersMapped;
     res.send(objekt);
 });
 
@@ -85,7 +84,6 @@ router.post("/:room/:action", (req, res) => {
 
     const action = req.params.action;
     if (action === "joinRoom") {
-        // check if player have already joined a room
         const playerRoom = rooms.find(
             (room) => room.getPlayerBySessionID(sessionID) !== undefined
         );
@@ -97,7 +95,20 @@ router.post("/:room/:action", (req, res) => {
             res.status(403).send({ message: "Room full" });
         } else {
             room.addPlayer(player);
-            res.status(200).send({ message: "Player joined room" });
+            res.status(200).send({
+                message: "Player joined room",
+                success: true,
+            });
+        }
+    } else if (action === "leaveRoom") {
+        if (room.getStatus() !== "WAITING") {
+            res.status(403).send({ message: "Room not waiting" });
+        } else {
+            room.removePlayer(player);
+            res.status(200).send({
+                message: "Player left room",
+                success: true,
+            });
         }
     } else if (action === "start") {
         room.setStatus("STARTED");
