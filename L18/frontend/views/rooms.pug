@@ -150,7 +150,7 @@ html(lang="en")
                 document.querySelector(".login-container").style.display = "none";
                 document.querySelector(".user-info").innerHTML = "<h2>Velkommen til Yatzy spillet</h2>";
                 document.querySelector(".user-info").innerHTML += "<p>Her kan du spille Yatzy med dine venner.</p>";
-                document.querySelector(".container").appendChild(document.createElement("button")).outerHTML = `<button class="btn-primary" style="margin-top: 20px;" onclick="window.location.href='/create'">Opret et nyt rum</button>`;
+                document.querySelector(".container").appendChild(document.createElement("button")).outerHTML = `<button class="btn-primary" style="margin-top: 20px;" onclick="createRoom(event)">Opret rum</button>`;
             } else {
                 document.querySelector(".user-info").innerHTML = "";
                 document.querySelector(".user-info").style.display = "none";
@@ -184,6 +184,18 @@ html(lang="en")
                 if (values.sessionID !== undefined) {
                     sessionStorage.setItem("sessionID", values.sessionID);
                     location.reload();
+                } else {
+                    alert(values.message);
+                }
+            }
+
+            async function createRoom(event) {
+                event.preventDefault();
+                const sID = sessionStorage.getItem("sessionID");
+                const values = await post("!{apiURL}" + "/rooms/create", {}, sID);
+                console.log(values);
+                if (values.success === true) {
+                    location.href = location.href.split("/")[0] + "/room/" + values.roomID;
                 } else {
                     alert(values.message);
                 }

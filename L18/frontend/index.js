@@ -1,5 +1,4 @@
 import express from "express";
-// import sessions from "express-session";
 const app = express();
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -11,20 +10,6 @@ const __dirname = dirname(__filename);
 app.set("view engine", "pug");
 app.set("views", __dirname + "/views");
 app.use("/static/", express.static(__dirname + "/public"));
-
-// app.use(
-//     sessions({
-//         secret: "yatzysecret2024",
-//         saveUninitialized: true,
-//         cookie: {
-//             sameSite: "none",
-//             secure: false,
-//             httpOnly: true,
-//             maxAge: 1000 * 60 * 60,
-//         }, // 24 hours
-//         resave: true,
-//     })
-// );
 
 app.get("/", (req, res) => {
     // lazy redirect to real main page
@@ -67,6 +52,15 @@ app.get("/room/:roomID", (req, res) => {
     const apiReqURL = getAPIURL() + "/rooms/" + roomID;
     get(apiReqURL)
         .then((values) => {
+            if (
+                values.message !== undefined &&
+                values?.success === undefined &&
+                values?.success !== true
+            ) {
+                console.log(values.message);
+                res.render("error", { error: values.message });
+                return;
+            }
             values.post = post;
             values.get = get;
             values.apiURL = getAPIURL();

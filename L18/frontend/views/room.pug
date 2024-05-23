@@ -41,6 +41,12 @@ html(lang="en")
       .btn-primary:hover {
         background-color: #0056b3;
       }
+      .button-group {
+        display: flex;
+        justify-content: center;
+        gap: 10px; /* Add spacing between buttons */
+        margin: 10px 0;
+      }
       ul {
         list-style-type: none;
         padding: 0;
@@ -85,7 +91,7 @@ html(lang="en")
       h1 Velkommen til Yatzy spillet
       p Her kan du spille Yatzy med dine venner.
 
-      if status == "WAITING"
+      if status == "WAITING" && players.length < maxPlayers
         button.btn-primary(onclick="joinRoomHandler(event)") Join rum
 
       h2 Spillere i rum #{id} - (#{players.length}/#{maxPlayers}) : #{status}
@@ -106,9 +112,15 @@ html(lang="en")
                 span.finished-icon ✨
 
       if status == "WAITING" && players.length > 1
-        button.btn-primary(onclick="startGameHandler(event)") Start spil
-
-      button.btn-primary(onclick="window.location.href='/'") Tilbage til forsiden
+        .button-group
+          button.btn-primary(onclick="startGameHandler(event)") Start spil
+          button.btn-primary(onclick="window.location.href='/'") Tilbage til forsiden
+      else if status == "WAITING"
+        p Vent venligst på flere spillere..
+        p Mangler #{2-players.length} spiller(e) for at starte spillet
+        button.btn-primary(onclick="window.location.href='/'") Tilbage til forsiden
+      else
+        button.btn-primary(onclick="window.location.href='/'") Tilbage til forsiden
 
     script.
       !{post}

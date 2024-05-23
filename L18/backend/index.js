@@ -4,8 +4,6 @@ import cors from "cors";
 import sessions from "express-session";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
-import { Room } from "./Room.js";
-import { Player } from "./Player.js";
 import { URL } from "url";
 import fs from "fs";
 import path from "path";
@@ -107,46 +105,30 @@ loadRoutes(path.join(__dirname, "routes"));
 app.listen(8000, () => console.log("running"));
 
 //DEBUG values for rooms and players
-for (let i = 0; i <= 25; i++) {
-    const room = new Room(i.toString());
-    rooms.push(room);
-    const randomNumberOfPlayers = Math.floor(Math.random() * 5);
-    for (let j = 0; j < randomNumberOfPlayers; j++) {
-        const session = Math.floor(Math.random() * 1000000);
-        const player = new Player(`Player ${j + 1}`, "session." + session);
-        player.getYatzyDice().throwDice();
-        const randomNumberOfResults = Math.floor(Math.random() * 15) + 1;
-        for (let k = 0; k < randomNumberOfResults; k++) {
-            player.getYatzyDice().chooseField(k);
-        }
-        room.addPlayer(player);
-        players.push(player);
-    }
+// for (let i = 0; i <= 25; i++) {
+//     const room = new Room(i.toString());
+//     rooms.push(room);
+//     const randomNumberOfPlayers = Math.floor(Math.random() * 5);
+//     for (let j = 0; j < randomNumberOfPlayers; j++) {
+//         const session = Math.floor(Math.random() * 1000000);
+//         const player = new Player(`Player ${j + 1}`, "session." + session);
+//         player.getYatzyDice().throwDice();
+//         const randomNumberOfResults = Math.floor(Math.random() * 15) + 1;
+//         for (let k = 0; k < randomNumberOfResults; k++) {
+//             player.getYatzyDice().chooseField(k);
+//         }
+//         room.addPlayer(player);
+//         players.push(player);
+//     }
 
-    const randomStatus = Math.floor(Math.random() * 3);
-    if (randomStatus === 1) {
-        room.setStatus("STARTED");
-    }
-    if (randomStatus === 2) {
-        room.setStatus("FINISHED");
-    }
-}
-
-function createRoom() {
-    // if there is 5 rooms where the status is not started, then dont create a new room
-    if (rooms.filter((room) => room.getStatus() !== "STARTED").length >= 5) {
-        return null;
-    }
-    // id should be unique, so we need to find the highest id and add 1
-    const newID = rooms
-        .reduce((prev, current) =>
-            prev.getId() > current.getId() ? prev : current
-        )
-        .getId();
-    const room = new Room(newID + 1);
-    rooms.push(room);
-    return room;
-}
+//     const randomStatus = Math.floor(Math.random() * 3);
+//     if (randomStatus === 1) {
+//         room.setStatus("STARTED");
+//     }
+//     if (randomStatus === 2) {
+//         room.setStatus("FINISHED");
+//     }
+// }
 
 // export data to be used in routes
-export { rooms, players, createRoom };
+export { rooms, players };

@@ -29,7 +29,7 @@ router.get("/", (req, res) => {
 router.get("/:room", (req, res) => {
     const roomID = req.params.room;
     let resValues = {};
-    const room = rooms.find((room) => room.getId() === roomID);
+    const room = rooms.find((room) => room.id === roomID);
     if (room === undefined) {
         resValues = { message: "Room not found" };
         res.status(404).send(resValues);
@@ -111,16 +111,7 @@ router.post("/:room/:action", (req, res) => {
             player.setStarted(true);
             res.send({ message: "Player started", success: true });
         }
-    }
-    // else if (action === "createNewRoom") {
-    //     const newRoom = createRoom();
-    //     if (newRoom === null) {
-    //         res.status(400).send({ message: "Max number of rooms reached" });
-    //     } else {
-    //         res.send({ roomID: newRoom.getId() });
-    //     }
-    // }
-    else if (action === "validate") {
+    } else if (action === "validate") {
         res.send({ message: "All good", success: true });
     }
 });
