@@ -11,25 +11,23 @@ app.set("view engine", "pug");
 app.set("views", __dirname + "/views");
 app.use("/static/", express.static(__dirname + "/public"));
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
     // lazy redirect to real main page
     res.redirect("rooms");
 });
 
+// basic routing for all views
 app.get("/:view", (req, res) => {
     const page = req.params.view;
     if (page === "favicon.ico") {
+        // ignore favicon requests
         res.end();
         return;
     }
-
-    if (page === "") {
+    if (page.toLowerCase() !== "rooms") {
         res.render("error", { error: "404 - Page not found" });
         return;
     }
-    console.log("VIEW GET /" + page);
-    // print the ip from request
-    console.log("IP: " + req.ip);
 
     const apiReqURL = getAPIURL() + "/" + page;
     get(apiReqURL)
@@ -44,6 +42,7 @@ app.get("/:view", (req, res) => {
         });
 });
 
+// routing for specific rooms
 app.get("/room/:roomID", (req, res) => {
     const roomID = req.params.roomID;
     if (roomID === "") {
@@ -59,7 +58,6 @@ app.get("/room/:roomID", (req, res) => {
                 values?.success === undefined &&
                 values?.success !== true
             ) {
-                console.log(values.message);
                 res.render("error", { error: values.message });
                 return;
             }
@@ -73,14 +71,13 @@ app.get("/room/:roomID", (req, res) => {
         });
 });
 
+// routing for game
 app.get("/room/:roomID/game", async (req, res) => {
-    console.log("GET /room/:roomID/game");
     const roomID = req.params.roomID;
     if (roomID === "") {
         res.render("error", { error: "404 - Room not found" });
         return;
     }
-
     const apiReqURL = getAPIURL() + "/rooms/" + roomID + "/validate";
     const sessionID = req.query?.sessionID;
     const respons = await post(apiReqURL, {}, sessionID);
@@ -91,7 +88,7 @@ app.get("/room/:roomID/game", async (req, res) => {
     }
 });
 
-const host = "0.0.0.0";
+const host = "localhost";
 const port = 3000;
 app.listen(port, host, () => {
     console.log(`Server running on http://${host}:${port}`);

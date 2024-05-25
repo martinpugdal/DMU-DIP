@@ -1,11 +1,12 @@
 import express from "express";
 const router = express.Router();
-import { players } from "../../index.js";
-import { randomBytes } from "crypto";
+import { players, playerCollection } from "../../index.js";
 import { Player } from "../../player.js";
+import { randomBytes } from "crypto";
+import { addDoc } from "firebase/firestore";
 
 router.post("/", (req, res) => {
-    const { username, password, sessionID } = req.body;
+    const { username, password } = req.body;
 
     if (username === undefined) {
         res.status(403).json({ message: "Username not provided" });
@@ -23,33 +24,28 @@ router.post("/", (req, res) => {
         res.status(403).json({ message: "Password cannot be empty" });
         return;
     }
-    // already have an account
-    if (sessionID !== undefined && sessionID !== "") {
-        res.status(403).json({
-            message: "Already logged in with this sessionID",
-        });
-        return;
-    }
 
-    const player = players.find(
+    // one username globally
+    const playerExists = players.some(
         (player) => player.getName().toLowerCase() === username.toLowerCase()
     );
-    // player should exists
-    if (player === undefined) {
-        res.status(403).json({ message: "Player not found" });
-        return;
-    }
-
-    if (Player.hashPassword(password) !== player.getPassword()) {
-        res.status(403).json({ message: "Wrong password" });
+    if (playerExists === true) {
+        res.status(403).json({ message: "Username already taken" });
         return;
     }
 
     // create new player
     const generatedID = randomBytes(20).toString("hex");
-    player.setSession(generatedID);
+    const newPlayer = new Player(username, generatedID);
+    const hashedPassword = Player.hashPassword(password);
+    newPlayer.setPassword(hashedPassword);
+    players.push(newPlayer);
+    addDoc(playerCollection, {
+        name: username,
+        password: hashedPassword,
+    });
     res.send({
-        message: "Login successful",
+        message: "Signup successful",
         sessionID: generatedID,
         success: true,
     });

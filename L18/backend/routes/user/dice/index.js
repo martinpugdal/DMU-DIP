@@ -1,6 +1,8 @@
 import express from "express";
 const router = express.Router();
-import { rooms } from "../../index.js";
+import { rooms, roomCollection, playerCollection } from "../../../index.js";
+import { getDocs, query, where, updateDoc } from "firebase/firestore";
+import { YatzyDice } from "../../../YatzyDice.js";
 
 router.get("/", (req, res) => {
     const sessionID = req.query?.sessionID;
@@ -23,6 +25,10 @@ router.get("/", (req, res) => {
         res.status(404).send({ message: "Player not found" });
         return;
     }
+    if (dice === undefined || dice === null) {
+        res.status(404).send({ message: "Dice not found" });
+        return;
+    }
     res.send({
         success: true,
         dice: player.getYatzyDice().toMap(),
@@ -40,11 +46,16 @@ router.post("/:action", (req, res) => {
         res.status(404).send({ message: "Room not found" });
         return;
     }
+    if (room.getStatus() !== "STARTED") {
+        res.status(403).send({ message: "Room not started" });
+        return;
+    }
     const player = room.getPlayerBySessionID(sessionID);
     if (player === undefined) {
         res.status(404).send({ message: "Player not found" });
         return;
     }
+
     const dice = player.getYatzyDice();
     const action = req.params.action;
     if (action === "roll") {
@@ -70,7 +81,18 @@ router.post("/:action", (req, res) => {
                 dice.unlockDie(i);
             }
         }
-        dice.throwDice();
+        dice.throw();
+        const playerQuery = query(
+            playerCollection,
+            where("name", "==", player.getName())
+        );
+        getDocs(playerQuery).then((querySnapshot) => {
+            querySnapshot.docs.forEach((doc) => {
+                updateDoc(doc.ref, {
+                    yatzyDice: dice.toMap(),
+                });
+            });
+        });
         res.send({
             success: true,
             dice: dice.toMap(),
@@ -104,8 +126,70 @@ router.post("/:action", (req, res) => {
                 }
                 if (done && room.getPlayers().length > 0) {
                     room.setStatus("FINISHED");
+                    const roomQuery = query(
+                        roomCollection,
+                        where("id", "==", room.getId())
+                    );
+                    getDocs(roomQuery).then((querySnapshot) => {
+                        querySnapshot.docs.forEach((doc) => {
+                            updateDoc(doc.ref, {
+                                status: "FINISHED",
+                            });
+                        });
+                    });
+
+                    //calculate winner and update player stats
+                    const winnerPlayer = room
+                        .getPlayers()
+                        .reduce((prev, current) =>
+                            prev.getScore() > current.getScore()
+                                ? prev
+                                : current
+                        );
+                    for (let i = 0; i < room.getPlayers().length; i++) {
+                        const player = room.getPlayers()[i];
+                        player.addOldYatzyDice();
+                        player.setYatzyDice(null);
+                        const playerQuery = query(
+                            playerCollection,
+                            where("name", "==", player.getName())
+                        );
+                        getDocs(playerQuery).then((querySnapshot) => {
+                            const obj =
+                                winnerPlayer === player
+                                    ? { wins: player.getWins() + 1 }
+                                    : { losses: player.getLosses() + 1 };
+                            obj.yatzyDice = null;
+                            obj.oldYatzyDice = player
+                                .getOldYatzyDice()
+                                .map((yatzyDice) => {
+                                    const obj = yatzyDice.toMap();
+                                    obj.roomID = room.getId();
+                                    return obj;
+                                });
+                            querySnapshot.docs.forEach((doc) => {
+                                updateDoc(doc.ref, obj);
+                            });
+                        });
+                    }
+                    res.send({
+                        success: true,
+                        dice: dice.toMap(),
+                    });
+                    return;
                 }
             }
+            const playerQuery = query(
+                playerCollection,
+                where("name", "==", player.getName())
+            );
+            getDocs(playerQuery).then((querySnapshot) => {
+                querySnapshot.docs.forEach((doc) => {
+                    updateDoc(doc.ref, {
+                        yatzyDice: dice.toMap(),
+                    });
+                });
+            });
             res.send({
                 success: true,
                 dice: dice.toMap(),

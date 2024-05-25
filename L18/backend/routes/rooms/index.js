@@ -1,6 +1,12 @@
 import express from "express";
 const router = express.Router();
-import { rooms, players } from "../../index.js";
+import {
+    rooms,
+    players,
+    roomCollection,
+    playerCollection,
+} from "../../index.js";
+import { getDocs, query, where, updateDoc } from "firebase/firestore";
 
 router.get("/", (req, res) => {
     const objekt = {};
@@ -36,11 +42,21 @@ router.get("/:room", (req, res) => {
     }
     const playerList = room.getPlayers();
     const playerValues = playerList.map((player) => {
+        const roomScore =
+            room.getStatus() === "FINISHED"
+                ? player
+                      .getOldYatzyDice()
+                      .find(
+                          (yatzyDice) => yatzyDice.getRoomID() === room.getId()
+                      )
+                      ?.getResults()
+                      .reduce((a, b) => a + b, 0)
+                : player.getScore();
         return {
             name: player.getName(),
-            started: player.getStarted(),
-            finished: player.isFinished(),
-            score: player.getScore(),
+            finished:
+                room.getStatus() === "FINISHED" ? true : player.isFinished(),
+            score: roomScore,
         };
     });
     resValues = {
@@ -85,7 +101,9 @@ router.post("/:room/:action", (req, res) => {
     const action = req.params.action;
     if (action === "joinRoom") {
         const playerRoom = rooms.find(
-            (room) => room.getPlayerBySessionID(sessionID) !== undefined
+            (room) =>
+                room.getPlayerBySessionID(sessionID) !== undefined &&
+                room.getStatus() !== "FINISHED"
         );
         if (playerRoom !== undefined) {
             res.status(403).send({ message: "Player already joined a room" });
@@ -95,6 +113,17 @@ router.post("/:room/:action", (req, res) => {
             res.status(403).send({ message: "Room full" });
         } else {
             room.addPlayer(player);
+            const roomQuery = query(
+                roomCollection,
+                where("id", "==", room.getId())
+            );
+            getDocs(roomQuery).then((querySnapshot) => {
+                querySnapshot.docs.forEach((doc) => {
+                    updateDoc(doc.ref, {
+                        players: room.players.map((player) => player.getName()),
+                    });
+                });
+            });
             res.status(200).send({
                 message: "Player joined room",
                 success: true,
@@ -105,23 +134,62 @@ router.post("/:room/:action", (req, res) => {
             res.status(403).send({ message: "Room not waiting" });
         } else {
             room.removePlayer(player);
+            const roomQuery = query(
+                roomCollection,
+                where("id", "==", room.getId())
+            );
+            getDocs(roomQuery).then((querySnapshot) => {
+                querySnapshot.docs.forEach((doc) => {
+                    updateDoc(doc.ref, {
+                        players: room.players.map((player) => player.getName()),
+                    });
+                });
+            });
             res.status(200).send({
                 message: "Player left room",
                 success: true,
             });
         }
     } else if (action === "start") {
-        room.setStatus("STARTED");
-        res.status(200).send({ message: "Game started", success: true });
-    } else if (action === "userStarted") {
-        if (room.getStatus() !== "STARTED") {
-            res.send({ message: "Game not started", success: false });
-        } else if (player.getStarted() === true) {
-            res.send({ message: "Player already started", success: false });
-        } else {
-            player.setStarted(true);
-            res.send({ message: "Player started", success: true });
+        if (room.getStatus() !== "WAITING") {
+            res.status(403).send({ message: "Room not waiting" });
+            return;
         }
+        room.setStatus("STARTED");
+        for (const player of room.getPlayers()) {
+            if (
+                player.getYatzyDice() === undefined ||
+                player.getYatzyDice() === null
+            ) {
+                player.resetYatzyDice();
+            }
+            player.getYatzyDice().setRoomID(room.getId());
+            const playerQuery = query(
+                playerCollection,
+                where("name", "==", player.getName())
+            );
+            getDocs(playerQuery).then((querySnapshot) => {
+                const obj = player.getYatzyDice().toMap();
+                obj.roomID = room.getId();
+                querySnapshot.docs.forEach((doc) => {
+                    updateDoc(doc.ref, {
+                        yatzyDice: obj,
+                    });
+                });
+            });
+        }
+        const roomQuery = query(
+            roomCollection,
+            where("id", "==", room.getId())
+        );
+        getDocs(roomQuery).then((querySnapshot) => {
+            querySnapshot.docs.forEach((doc) => {
+                updateDoc(doc.ref, {
+                    status: "STARTED",
+                });
+            });
+        });
+        res.status(200).send({ message: "Game started", success: true });
     } else if (action === "validate") {
         res.send({ message: "All good", success: true });
     }

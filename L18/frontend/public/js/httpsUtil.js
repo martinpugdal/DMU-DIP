@@ -11,7 +11,6 @@ async function post(url, objekt, sessionID = "") {
         headers: {
             "Content-Type": "application/json",
         },
-        credentials: "include",
     });
     return await respons.json();
 }
@@ -34,7 +33,6 @@ async function get(url, sessionID = "") {
         headers: {
             "Content-Type": "application/json",
         },
-        credentials: "include",
     });
     return await respons.json();
 }
@@ -48,7 +46,6 @@ async function put(url, objekt, sessionID = "") {
         headers: {
             "Content-Type": "application/json",
         },
-        credentials: "include",
     });
     if (respons.status !== 204) throw new Error(respons.status);
 }

@@ -25,6 +25,11 @@ export class Room {
         this.status = status;
     }
     addPlayer(player) {
+        if (this.players.length >= this.maxPlayers) {
+            throw new Error("Room is full");
+        } else if (this.players.includes(player)) {
+            throw new Error("Player already in room");
+        }
         this.players.push(player);
     }
     removePlayer(player) {
@@ -35,17 +40,22 @@ export class Room {
     getPlayers() {
         return this.players;
     }
-    getPlayerByName(name) {
-        return this.players.find((player) => player.getName() === name);
-    }
-    removePlayerByName(name) {
-        this.players = this.players.filter(
-            (player) => player.getName() !== name
-        );
-    }
     getPlayerBySessionID(sessionID) {
         return this.players.find((player) => player.getSession() === sessionID);
     }
+
+    static fromMap(map, players) {
+        const room = new Room(map.id);
+        room.maxPlayers = map.maxPlayers;
+        room.players = players.filter((player) =>
+            map.players
+                .map((username) => username.toLowerCase())
+                .includes(player.name.toLowerCase())
+        );
+        room.status = map.status;
+        return room;
+    }
+
     toMap() {
         return {
             id: this.id,

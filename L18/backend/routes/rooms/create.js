@@ -1,7 +1,8 @@
 import express from "express";
 const router = express.Router();
-import { players, rooms } from "../../index.js";
-import { Room } from "../../Room.js";
+import { players, rooms, roomCollection } from "../../index.js";
+import { Room } from "../../room.js";
+import { addDoc } from "firebase/firestore";
 
 router.post("/", (req, res) => {
     const sessionID = req.body?.sessionID;
@@ -14,6 +15,16 @@ router.post("/", (req, res) => {
         res.status(404).send({ message: "Player not found" });
         return;
     }
+    if (
+        rooms.some(
+            (room) =>
+                room.getPlayers().includes(player) &&
+                room.getStatus() !== "FINISHED"
+        )
+    ) {
+        res.status(403).send({ message: "Player already in a room" });
+        return;
+    }
 
     const room = createRoom();
     if (room === null) {
@@ -21,6 +32,12 @@ router.post("/", (req, res) => {
     } else {
         rooms.push(room);
         room.addPlayer(player);
+        addDoc(roomCollection, {
+            id: room.getId(),
+            players: room.getPlayers().map((player) => player.getName()),
+            maxPlayers: room.getMaxPlayers(),
+            status: room.getStatus(),
+        });
         res.send({ message: "Success", roomID: room.getId(), success: true });
     }
 });

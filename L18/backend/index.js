@@ -1,6 +1,5 @@
 import express from "express";
 const app = express();
-import cors from "cors";
 import sessions from "express-session";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -9,6 +8,8 @@ import fs from "fs";
 import path from "path";
 import { Room } from "./room.js";
 import { Player } from "./player.js";
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,6 +18,20 @@ const __dirname = dirname(__filename);
 const rooms = [];
 // Array to store all players
 const players = [];
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCegl1i1QmwiB4HjFL5a1rRPikZiHw48AI",
+    authDomain: "yatzyprojekt-248e7.firebaseapp.com",
+    projectId: "yatzyprojekt-248e7",
+    storageBucket: "yatzyprojekt-248e7.appspot.com",
+    messagingSenderId: "229545330983",
+    appId: "1:229545330983:web:338b6e20baa2fbac820102",
+    measurementId: "G-3YLENX4KZT",
+};
+// Initialize Firebase
+const firestoreApp = initializeApp(firebaseConfig);
+const database = getFirestore(firestoreApp);
+
 app.use(
     sessions({
         secret: "yatzysecret2024",
@@ -31,15 +46,19 @@ app.use(
     })
 );
 
+app.use(function (_req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+    );
+    res.header(
+        "Access-Control-Allow-Methods",
+        "GET, PUT, POST, DELETE, OPTIONS"
+    );
+    next();
+});
 app.use(express.json());
-app.use(
-    cors({
-        origin: true,
-        credentials: true,
-        optionsSuccessStatus: 200,
-    })
-);
-app.use(express.urlencoded({ extended: true }));
 
 /*
  * Load all routes from the routes folder
@@ -94,42 +113,35 @@ function loadRoutes(dir, routePrefix = "") {
 }
 
 loadRoutes(path.join(__dirname, "routes"));
+
+const playerCollection = collection(database, "players");
+const roomCollection = collection(database, "rooms");
+
+const getPlayers = async () => {
+    const playerSnapshot = await getDocs(playerCollection);
+    const playerList = playerSnapshot.docs.map((doc) => doc.data());
+    return playerList;
+};
+const getRooms = async () => {
+    const roomSnapshot = await getDocs(roomCollection);
+    const roomList = roomSnapshot.docs.map((doc) => doc.data());
+    return roomList;
+};
+
+getPlayers().then((playerList) => {
+    playerList.forEach((player) => {
+        const cPlayer = Player.fromMap(player);
+        players.push(cPlayer);
+    });
+});
+getRooms().then((roomList) => {
+    roomList.forEach((room) => {
+        const cRoom = Room.fromMap(room, players);
+        rooms.push(cRoom);
+    });
+});
+
 app.listen(8000, () => console.log("running"));
 
-//DEBUG values for rooms and players
-const testRoomsSize = 3;
-for (let i = 0; i <= testRoomsSize; i++) {
-    const room = new Room(i.toString());
-    rooms.push(room);
-    const randomNumberOfPlayers = Math.floor(Math.random() * 5);
-    for (let j = 0; j < randomNumberOfPlayers; j++) {
-        const session = Math.floor(Math.random() * 1000000);
-        const player = new Player(
-            `${session}`.slice(0, 5),
-            "session." + session
-        );
-        player.getYatzyDice().throwDice();
-        const randomNumberOfResults = Math.floor(Math.random() * 15) + 1;
-        for (let k = 0; k < randomNumberOfResults; k++) {
-            player.getYatzyDice().chooseField(k);
-        }
-        room.addPlayer(player);
-        players.push(player);
-    }
-
-    const randomStatus = Math.floor(Math.random() * 2);
-    let done = true;
-    for (let j = 0; j < room.getPlayers().length; j++) {
-        if (!room.getPlayers()[j].isFinished()) {
-            done = false;
-        }
-    }
-    if (done && room.getPlayers().length > 0) {
-        room.setStatus("FINISHED");
-    } else if (room.getPlayers().length > 0 && randomStatus === 0) {
-        room.setStatus("STARTED");
-    }
-}
-
 // export data to be used in routes
-export { rooms, players };
+export { rooms, players, roomCollection, playerCollection };

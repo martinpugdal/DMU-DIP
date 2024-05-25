@@ -177,39 +177,37 @@ html(lang="en")
         return res.room?.id === roomID;
       }
 
-      // lifecycle methods
-      document.addEventListener("DOMContentLoaded", async () => {
-        const sessionID = sessionStorage.getItem("sessionID");
-        const joinButton = document.getElementById("join-room-button");
-        const leaveButton = document.getElementById("leave-room-button");
-        const startButton = document.getElementById("start-game-button");
+      function goBackToGame(roomID, sessionID) {
+        const newLocation = location.href + "/game";
+        location.href = newLocation + "?sessionID=" + sessionID;
+      }
 
-        if (sessionID) {
-          const playerInRoom = await checkPlayerInRoom("#{id}", sessionID);
-          console.log(playerInRoom);
-          if (playerInRoom && "#{status}" === "WAITING" && #{players.length} < #{maxPlayers}) {
+      const sessionID = sessionStorage.getItem("sessionID");
+      const joinButton = document.getElementById("join-room-button");
+      const leaveButton = document.getElementById("leave-room-button");
+      const startButton = document.getElementById("start-game-button");
+
+      if (sessionID) {
+        checkPlayerInRoom("#{id}", sessionID).then((inRoom) => {
+          if (inRoom && "#{status}" === "WAITING" && #{players.length} <= #{maxPlayers}) {
             joinButton.style.display = "none";
             leaveButton.style.display = "block";
             if (#{players.length} > 1) {
               startButton.style.display = "block";
             }
-          } else if (!playerInRoom && "#{status}" === "WAITING" && #{players.length} < #{maxPlayers}) {
+          } else if (!inRoom && "#{status}" === "WAITING" && #{players.length} < #{maxPlayers}) {
             joinButton.style.display = "block";
             leaveButton.style.display = "none";
             startButton.style.display = "none";
+          } else if ("#{status}" == "STARTED" && inRoom) {
+              const playerNeededDiv = document.querySelector(".playerNeeded");
+              const button = document.createElement("button");
+              button.classList.add("btn-primary");
+              button.style.marginTop = "-20px";
+              button.style.backgroundColor = "#28a745";
+              button.onclick = () => goBackToGame("#{id}", sessionID);
+              button.textContent = "Tilbage til spillet";
+              playerNeededDiv.appendChild(button);
           }
-        }
-      });
-
-      //- setInterval(async () => {
-      //-   const sessionID = sessionStorage.getItem("sessionID");
-      //-   if (sessionID) {
-      //-     const res = await get("!{apiURL}" + "/rooms/" + "#{id}", sessionID);
-      //-     if (res.status === "STARTED" && res.player) {
-      //-       const newLocation = location.href + "/game";
-      //-       window.location.href = newLocation + "?sessionID=" + sessionID;
-      //-     } else if (res.status === "STARTED" || res.status === "WAITING") {
-      //-       location.reload();
-      //-     }
-      //-   }
-      //- }, 5000);
+        });
+      }

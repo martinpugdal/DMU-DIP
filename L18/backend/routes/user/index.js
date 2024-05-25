@@ -18,11 +18,19 @@ router.get("/", (req, res) => {
 
     const room =
         roomID !== undefined
-            ? rooms.find((room) => room.getId() === roomID)
+            ? rooms.find(
+                  (room) =>
+                      room.getId() === roomID && room.getStatus() !== "FINISHED"
+              )
             : rooms.find(
-                  (room) => room.getPlayerBySessionID(sessionID) !== undefined
+                  (room) =>
+                      room.getPlayerBySessionID(sessionID) !== undefined &&
+                      room.getStatus() !== "FINISHED"
               );
-    if (roomID !== undefined && room.getId() !== roomID) {
+    if (
+        roomID !== undefined &&
+        (room === undefined || room.getId() !== roomID)
+    ) {
         res.status(404).json({ message: "Room not found" });
         return;
     }
