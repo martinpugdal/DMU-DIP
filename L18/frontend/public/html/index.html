@@ -8,10 +8,11 @@
 	<body>
 		<div
 			class="container"
-			style="display: grid; grid-template-columns: 15% 70% 15%; gap: 10px"
+			style="display: grid; grid-template-columns: 20% 80%; gap: 20px; align-items: center;"
 		>
 			<!-- left side -->
-			<div id="info">
+			<!-- place it at top of -->
+			<div id="info" style="margin-top: -380%; margin-left: -60%;">
 				<h2>Information</h2>
 				<p>
 					<strong>Player Name:</strong>
@@ -44,27 +45,27 @@
 					<tbody>
 						<tr>
 							<td id="one-s" class="score-info">1-s</td>
-							<td id="one-s" class="score-field">0</td>
+							<td id="one-s" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="two-s" class="score-info">2-s</td>
-							<td id="two-s" class="score-field">0</td>
+							<td id="two-s" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="three-s" class="score-info">3-s</td>
-							<td id="three-s" class="score-field">0</td>
+							<td id="three-s" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="four-s" class="score-info">4-s</td>
-							<td id="four-s" class="score-field">0</td>
+							<td id="four-s" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="five-s" class="score-info">5-s</td>
-							<td id="five-s" class="score-field">0</td>
+							<td id="five-s" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="six-s" class="score-info">6-s</td>
-							<td id="six-s" class="score-field">0</td>
+							<td id="six-s" class="score-field"> </td>
 
 							<td id="sum">Sum:</td>
 							<td id="sum" class="score-field"></td>
@@ -74,47 +75,47 @@
 						</tr>
 						<tr>
 							<td id="one-pair" class="score-info">One pair</td>
-							<td id="one-pair" class="score-field">0</td>
+							<td id="one-pair" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="two-pair" class="score-info">Two pairs</td>
-							<td id="two-pair" class="score-field">0</td>
+							<td id="two-pair" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="three-same" class="score-info">
 								Three same
 							</td>
-							<td id="three-same" class="score-field">0</td>
+							<td id="three-same" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="four-same" class="score-info">Four same</td>
-							<td id="four-same" class="score-field">0</td>
+							<td id="four-same" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="full-house" class="score-info">
 								Full house
 							</td>
-							<td id="full-house" class="score-field">0</td>
+							<td id="full-house" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="small-straight" class="score-info">
 								Small straight
 							</td>
-							<td id="small-straight" class="score-field">0</td>
+							<td id="small-straight" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="large-straight" class="score-info">
 								Large straight
 							</td>
-							<td id="large-straight" class="score-field">0</td>
+							<td id="large-straight" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="chance" class="score-info">Chance</td>
-							<td id="chance" class="score-field">0</td>
+							<td id="chance" class="score-field"> </td>
 						</tr>
 						<tr>
 							<td id="yatzy" class="score-info">Yatzy</td>
-							<td id="yatzy" class="score-field">0</td>
+							<td id="yatzy" class="score-field"> </td>
 
 							<td></td>
 							<td></td>
@@ -124,13 +125,6 @@
 						</tr>
 					</tbody>
 				</table>
-			</div>
-			<!-- right side -->
-			<div id="chat">
-				<h2>Global chat</h2>
-				<div id="chat-messages"></div>
-				<input id="chat-input" type="text" />
-				<button id="send-chat">Send</button>
 			</div>
 		</div>
 		<script src="/static/js/index.js" type="module"></script>
