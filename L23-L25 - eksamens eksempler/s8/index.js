@@ -2,7 +2,7 @@
 // returnerer en funktion, der returnerer et tilfældigt tal mellem 0 og parameteren.
 
 function randomTal(number) {
-    return () => Math.floor(Math.random() * number);
+	return () => Math.floor(Math.random() * number);
 }
 
 // Lav en anden funktion tilfaeldigAlder som en variabel
@@ -11,8 +11,8 @@ const tilfaeldigAlder = randomTal(100);
 
 // Lav en klasse Person med attributter Alder og Hoejde.
 function Person(alder, hoejde) {
-    this.alder = alder;
-    this.hoejde = hoejde;
+	this.alder = alder;
+	this.hoejde = hoejde;
 }
 
 // Lav en funktion LavTilfaeldigePersoner(), der tager to parametre:
@@ -20,17 +20,20 @@ function Person(alder, hoejde) {
 // der genererer tilfældige højder.
 // Funktionen skal returnere et array med 20 tilfældige personer
 // ved brug af de to funktioner, der kommer med som parametre.
-function LavTilfaeldigePersoner(alderFunc, hoejdeFunc) {
-    const personer = [];
 
-    for (let i = 0; i < 20; i++) {
-        let person = new Person(alderFunc(), hoejdeFunc());
-        personer.push(person);
-    }
-    return personer;
+// function LavTilfaeldigePersoner(alderFunc, hoejdeFunc) {
+function LavTilfaeldigePersoner(func) {
+	const personer = [];
+
+	for (let i = 0; i < 20; i++) {
+		// let person = new Person(alderFunc(), hoejdeFunc());
+		let person = new Person(func(), func());
+		personer.push(person);
+	}
+	return personer;
 }
 
-const personer = LavTilfaeldigePersoner(tilfaeldigAlder, tilfaeldigAlder);
+const personer = LavTilfaeldigePersoner(tilfaeldigAlder);
 for (const personNumber in personer) {
-    console.log(personer[personNumber]);
+	console.log(personer[personNumber]);
 }
